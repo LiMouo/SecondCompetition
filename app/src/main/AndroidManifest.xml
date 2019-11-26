@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="limou.com.secondcompetition">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ma_min"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <service
+            android:name="limou.com.ServiceCatalog.ThresholdsService_2"
+            android:enabled="true"
+            android:exported="true"></service>
+        <service
+            android:name="limou.com.Test.ServiceTest.EnvironServiceTest"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name="limou.com.EnvironCatalog.EnvironTest.EnvironTestActivity" />
+
+        <service
+            android:name="limou.com.EnvironCatalog.EnvironService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name="limou.com.EnvironCatalog.EnvironActivity_2"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape" />
+
+        <service
+            android:name="limou.com.ServiceCatalog.ThresholdsService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name="limou.com.Test.ServiceTest.MyService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name="limou.com.Test.Test_Thresholds"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="limou.com.ThresholdsCatalog.ThresholdsActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="limou.com.Test.Test_Environ"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="limou.com.EnvironCatalog.EnvironActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="limou.com.MainActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_main"
+        android:title="RecyclerView"/>
+
+    <item
+        android:id="@+id/menu_Environ"
+        android:title="Environ"/>
+
+    <item
+        android:id="@+id/menu_Thresholds"
+        android:title="Thresholds"/>
+
+</menu>

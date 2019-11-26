@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">软件</string>
+    <string name="main_title">我是原生通知栏标题</string>
+    <string name="main_content">我是原生通知栏内容</string>
+    <string name="Thresholds_title">我是原生通知栏内容</string>
+    <string name="Thresholds_content">我是原生通知栏内容</string>
+</resources>
