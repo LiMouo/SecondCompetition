@@ -12,7 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name="limou.com.RealTimeHome.RealTimeActivity"></activity>
+        <activity android:name="limou.com.RealTimeHome.RealTimeActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            ></activity>
 
         <service
             android:name="limou.com.ServiceCatalog.ThresholdsService"

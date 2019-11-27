@@ -3,7 +3,12 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/change_xml"
     >
+
+    <limou.com.ToolsHome.SecondTitleTools
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/VP_main"
@@ -21,7 +26,7 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="5"/>
+            android:layout_weight="1"/>
         <RadioGroup
             android:id="@+id/RG_main"
             android:layout_width="0dp"
