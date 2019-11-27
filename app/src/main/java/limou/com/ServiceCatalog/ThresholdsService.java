@@ -27,11 +27,13 @@ import limou.com.secondcompetition.R;
 
 public class ThresholdsService extends Service {
     private String TAG = "ThresholdsService";
+    private String TAG_arr = "ThresholdsService_Arr";
     private SharedPreferences.Editor editor;
     private SharedPreferences preferences;
     private Boolean isTrue;
     private NotificationManager manager;
-    private String[] arr = new String[6];
+    private String[] arr_1 = new String[6];
+    private String[] arr_2 = new String[6];
     private Handler handler = new Handler();
 
     public ThresholdsService() {
@@ -41,8 +43,8 @@ public class ThresholdsService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate: " + "服务器初始化");
-        editor = getSharedPreferences("Threshold_Test", MODE_PRIVATE).edit();
-        preferences = getSharedPreferences("Threshold_Test", MODE_PRIVATE);
+        editor = getSharedPreferences("Threshold", MODE_PRIVATE).edit();
+        preferences = getSharedPreferences("Threshold", MODE_PRIVATE);
         /*MyNotification_Thresholds();*/
         manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         isTrue = true;
@@ -52,12 +54,12 @@ public class ThresholdsService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (startId == 1) {
             Log.d(TAG, "阈值服务 启动实体 => " + startId);
-            arr[0] = preferences.getString("temperature", null);
-            arr[1] = preferences.getString("humidity", null);
-            arr[2] = preferences.getString("LightIntensity", null);
-            arr[3] = preferences.getString("co2", null);
-            arr[4] = preferences.getString("pm25", null);
-            arr[5] = preferences.getString("Status", null);
+            arr_1[0] = preferences.getString("temperature", null);
+            arr_1[1] = preferences.getString("humidity", null);
+            arr_1[2] = preferences.getString("LightIntensity", null);
+            arr_1[3] = preferences.getString("co2", null);
+            arr_1[4] = preferences.getString("pm25", null);
+            arr_1[5] = preferences.getString("Status", null);
             startT();
         }
         Log.d(TAG, "onStartCommand: " + "服务器连接");
@@ -74,7 +76,7 @@ public class ThresholdsService extends Service {
         final Map<String, String> map_2 = new HashMap<>();
         map_2.put("RoadId", "1");
         map_2.put("UserName", "user1");
-        final JSONObject json_2 = new JSONObject(map_1);
+        final JSONObject json_2 = new JSONObject(map_2);
 
         new Thread(new Runnable() {
             @Override
@@ -87,21 +89,20 @@ public class ThresholdsService extends Service {
                     } catch (Exception e) {
                         e.printStackTrace();
                         error();
-                        System.out.println("温度 1");
                     }
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                for (int i = 0; i < arr.length - 1; i++) {
-                                    if (!arr[i].equals("")) {
+                                for (int i = 0; i < arr_1.length - 1; i++) {
+                                    if (!arr_1[i].equals("")) {
                                         ifThreshold(i);
+                                        Log.d(TAG_arr, "arr_2["+i+"] 的值为" + arr_2[2]);
                                     }
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 error();
-                                System.out.println("温度 2");
                             }
                         }
                     });
@@ -127,19 +128,17 @@ public class ThresholdsService extends Service {
                     } catch (Exception e) {
                         e.printStackTrace();
                         error();
-                        System.out.println("道路 1");
                     }
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                if (!arr[5].equals("")) {
+                                if (!arr_1[5].equals("")) {
                                     ifThreshold(5);
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 error();
-                                System.out.println("道理 2");
                             }
                         }
                     });
@@ -160,34 +159,34 @@ public class ThresholdsService extends Service {
         try {
             switch (count) {
                 case 0:
-                    Log.e(TAG, "温度阈值: " + arr[count] + "  当前温度: " + OkHttpData.JsonObjectRead().getString("temperature"));
-                    if (Integer.parseInt(arr[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("temperature")))
-                        createNotification(this, 1, manager, "温度", arr[count] + "℃", OkHttpData.JsonObjectRead().getString("temperature") + " ℃");
+                    Log.e(TAG, "温度阈值: " + arr_1[count] + "  当前温度: " + OkHttpData.JsonObjectRead().getString("temperature"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("temperature")))
+                        createNotification(this, 1, manager, "温度", arr_1[count] + "℃", OkHttpData.JsonObjectRead().getString("temperature") + " ℃");
                     break;
                 case 1:
-                    Log.d(TAG, "温度阈值: " + arr[count] + " 当前湿度：" + OkHttpData.JsonObjectRead().getString("humidity"));
-                    if (Integer.parseInt(arr[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("humidity")))
-                        createNotification(this, 2, manager, "湿度", arr[count] + " hPa", OkHttpData.JsonObjectRead().getString("humidity") + " hPa");
+                    Log.d(TAG, "温度阈值: " + arr_1[count] + " 当前湿度：" + OkHttpData.JsonObjectRead().getString("humidity"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("humidity")))
+                        createNotification(this, 2, manager, "湿度", arr_1[count] + " hPa", OkHttpData.JsonObjectRead().getString("humidity") + " hPa");
                     break;
                 case 2:
-                    Log.e(TAG, "光照阈值: " + arr[count] + "  当前光照: " + OkHttpData.JsonObjectRead().getString("LightIntensity"));
-                    if (Integer.parseInt(arr[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("LightIntensity")))
-                        createNotification(this, 3, manager, "光照", arr[count] + " Lux", OkHttpData.JsonObjectRead().getString("LightIntensity") + " Lux");
+                    Log.e(TAG, "光照阈值: " + arr_1[count] + "  当前光照: " + OkHttpData.JsonObjectRead().getString("LightIntensity"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("LightIntensity")))
+                        createNotification(this, 3, manager, "光照", arr_1[count] + " Lux", OkHttpData.JsonObjectRead().getString("LightIntensity") + " Lux");
                     break;
                 case 3:
-                    Log.e(TAG, "C02阈值: " + arr[count] + "  当前C02: " + OkHttpData.JsonObjectRead().getString("co2"));
-                    if (Integer.parseInt(arr[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("co2")))
-                        createNotification(this, 4, manager, "CO₂", arr[count] + " mg/m3", OkHttpData.JsonObjectRead().getString("co2") + " mg/m3");
+                    Log.e(TAG, "C02阈值: " + arr_1[count] + "  当前C02: " + OkHttpData.JsonObjectRead().getString("co2"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("co2")))
+                        createNotification(this, 4, manager, "CO₂", arr_1[count] + " mg/m3", OkHttpData.JsonObjectRead().getString("co2") + " mg/m3");
                     break;
                 case 4:
-                    Log.e(TAG, "PM2.5阈值: " + arr[count] + "  当前PM2.5: " + OkHttpData.JsonObjectRead().getString("pm2.5"));
-                    if (Integer.parseInt(arr[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("pm2.5")))
-                        createNotification(this, 5, manager, "PM2.5", arr[count] + " μg/m3", OkHttpData.JsonObjectRead().getString("pm2.5") + " μg/m3");
+                    Log.e(TAG, "PM2.5阈值: " + arr_1[count] + "  当前PM2.5: " + OkHttpData.JsonObjectRead().getString("pm2.5"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("pm2.5")))
+                        createNotification(this, 5, manager, "PM2.5", arr_1[count] + " μg/m3", OkHttpData.JsonObjectRead().getString("pm2.5") + " μg/m3");
                     break;
                 case 5:
-                    Log.e(TAG, "道路阈值: " + arr[count] + "  当前道路: " + OkHttpData.JsonObjectRead().getString("Status"));
-                    if (Integer.parseInt(arr[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("Status")))
-                        createNotification(this, 6, manager, "道路", arr[5], OkHttpData.JsonObjectRead().getString("Status"));
+                    Log.e(TAG, "道路阈值: " + arr_1[count] + "  当前道路: " + OkHttpData.JsonObjectRead().getString("Status"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("Status")))
+                        createNotification(this, 6, manager, "道路", arr_1[5], OkHttpData.JsonObjectRead().getString("Status"));
                     break;
             }
         } catch (Exception e) {
