@@ -5,255 +5,205 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
-import com.google.gson.Gson;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import limou.com.NetworkHome.OkHttpData;
-import limou.com.SQLiteCatalog.SQLiteMaster;
-import limou.com.ThresholdsCatalog.ThresholdsActivity;
-import limou.com.ThresholdsCatalog.ThresholdsGson;
 import limou.com.secondcompetition.R;
 
 public class ThresholdsService_2 extends Service {
-    private String TAG = "ThresholdsActivity";
-    private SharedPreferences preferences_read,preferences_write;
-    private SharedPreferences.Editor editor ;
-    private int arr_1[] = new int[6]; //获取到的值
-    private String arr_2[] = new String[6]; //用户设置阈值
-    private int arr_3[] = new int[6]; //将用户设置阈值的值准换为int
-    private SQLiteDatabase db;
-    private ContentValues values = new ContentValues();
-    private Thread t_1,t_2;
-    private String url = "http://192.168.3.5:8088/transportservice/action/GetAllSense.do";
-    private String url_2 = "http://192.168.3.5:8088/transportservice/action/GetRoadStatus.do";
-    private ThresholdsGson thresholdsGson,thresholdsGson_2;
-    private Handler handler = new Handler();
+    private String TAG = "ThresholdsService_2";
+    private String TAG_arr = "ThresholdsService_Arr";
+    private SharedPreferences.Editor editor;
+    private SharedPreferences preferences;
+    private Boolean isTrue;
     private NotificationManager manager;
+    private String[] arr_1 = new String[6];
+    private String[] arr_2 = new String[6];
+    private Handler handler = new Handler();
 
-    public ThresholdsService_2() {}
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+    public ThresholdsService_2() {
     }
 
     @Override
     public void onCreate() {
-        InitEvent();//初始化数据
-        InsertData();//将数据进行存储
-        InitComparison();//将数据与用户设置阈值进行对比
-        Log.d(TAG, "阈值服务器启动");
         super.onCreate();
-    }
-
-    private void InsertData() {
-        arr_2[0] = preferences_read.getString("temperature","");
-        arr_2[1] = preferences_read.getString("humidity","");
-        arr_2[2] = preferences_read.getString("LightIntensity","");
-        arr_2[3] = preferences_read.getString("co2","");
-        arr_2[4] = preferences_read.getString("pm2.5","");
-        arr_2[5] = preferences_read.getString("Status","");
-
-        arr_3[0] = Integer.parseInt(arr_2[0]);
-        arr_3[1] = Integer.parseInt(arr_2[1]);
-        arr_3[2] = Integer.parseInt(arr_2[2]);
-        arr_3[3] = Integer.parseInt(arr_2[3]);
-        arr_3[4] = Integer.parseInt(arr_2[4]);
-        arr_3[5] = Integer.parseInt(arr_2[5]);
-        Log.d(TAG, "arr_2[0]  数据是"+arr_2[0]  + "   arr_3[0]  数据是"+arr_3[0] +"  arr_1[0] 的数据是" + arr_1[0]);
-        t_1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    long startTime = System.currentTimeMillis();
-                    JSONObject json_1 = new JSONObject();
-                    JSONObject json_2 = new JSONObject();
-                    Gson gson_1 = new Gson();
-                    Gson gson_2 = new Gson();
-                    try {
-                        json_1.put("UserName", "user1");
-                        json_2.put("RoadId", "1");
-                        json_2.put("UserName", "user1");
-
-                        OkHttpData.sendConnect(url, json_1.toString());
-                        thresholdsGson = gson_1.fromJson(OkHttpData.JsonObjectRead().toString(), ThresholdsGson.class);
-                        values.put("pm25", thresholdsGson.get_$Pm2526());
-                        values.put("co2", thresholdsGson.getCo2());
-                        values.put("LightIntensity", thresholdsGson.getLightIntensity());
-                        values.put("humidity", thresholdsGson.getHumidity());
-                        values.put("temperature", thresholdsGson.getTemperature());
-
-
-                        OkHttpData.sendConnect(url_2, json_2.toString());
-                        thresholdsGson_2 = gson_2.fromJson(OkHttpData.JsonObjectRead().toString(), ThresholdsGson.class);
-                        values.put("Status", thresholdsGson_2.getStatus());
-                        values.put("datetime", getDate());
-
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                long count = db.insert("ThresholdsService", null, values);
-                                Log.e(TAG, "写入数据库 第: " + count + " 条");
-                                if (count > 20) {
-                                    db.execSQL("delete from ThresholdsService where id = (select id from environ limit 1)");
-                                }
-                            }
-                        });
-
-                        try {
-                            long endTime = System.currentTimeMillis();
-                            Log.d(TAG, "代码运行时间" + (endTime - startTime) + "ms");//输出程序运行时间
-
-                            if ((endTime - startTime) > 10000) {
-                            } else {
-                                Thread.sleep(10000 - (endTime - startTime));
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-            }
-        });
-        t_1.start();
-    }
-
-    private void InitComparison() {
-        final Cursor cursor = db.query("ThresholdsService",null,null,null,null,null,null);
-        t_2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true){
-                    try {
-                    long startTime = System.currentTimeMillis();
-                    if (cursor.moveToFirst()){
-                        arr_1[0] = cursor.getInt(cursor.getColumnIndex("pm25"));
-                        Log.d(TAG, "t_2的数据 arr_1[0] " + arr_1[0]);
-                        arr_1[1] = cursor.getInt(cursor.getColumnIndex("co2"));
-                        arr_1[2] = cursor.getInt(cursor.getColumnIndex("LightIntensity"));
-                        arr_1[3] = cursor.getInt(cursor.getColumnIndex("humidity"));
-                        arr_1[4] = cursor.getInt(cursor.getColumnIndex("temperature"));
-                        arr_1[5] = cursor.getInt(cursor.getColumnIndex("Status"));
-                    }
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            temperature:{//温度4
-                                humidity:{//湿度3
-                                    LightIntensity:{//光照2
-                                        co2:{//1
-                                            pm25:{//0
-                                                Status:{//5
-                                                    Comparison:{
-                                                    if (arr_3[4] > arr_1[4])break temperature;
-                                                    if (arr_3[3] > arr_1[3])break humidity;
-                                                    if (arr_3[2] > arr_1[2])break LightIntensity;
-                                                    if (arr_3[1] > arr_1[1])break co2;
-                                                    if (arr_3[0] > arr_1[0])break pm25;
-                                                    if (arr_3[5] > arr_1[5])break Status;
-                                                    }
-                                                }createNotification(ThresholdsService_2.this, 6, manager, "道路",  String.valueOf(arr_3[5]), String.valueOf(arr_1[4]));
-                                            }createNotification(ThresholdsService_2.this, 5, manager, "PM2.5", arr_3[0] + " μg/m3", arr_1[0] + " μg/m3");
-                                        }createNotification(ThresholdsService_2.this, 4, manager, "CO₂", arr_3[1] + " mg/m3", arr_1[1] + " mg/m3");
-                                    }createNotification(ThresholdsService_2.this, 3, manager, "光照", arr_3[2] + " Lux", arr_1[2] + " Lux");
-                                }createNotification(ThresholdsService_2.this, 2, manager, "湿度", arr_3[3] + " hPa", arr_1[3] + " hPa");
-                               }createNotification(ThresholdsService_2.this, 1, manager, "温度", arr_3[4] + " ℃", arr_1[4] + " ℃");
-                        }
-                    });
-                        long endTime = System.currentTimeMillis();
-                        Log.d(TAG, "代码运行时间" + (endTime - startTime) + "ms");//输出程序运行时间
-                        if ((endTime - startTime) > 10000) {
-                        } else {
-                            Thread.sleep(10000 - (endTime - startTime));
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-            }
-        });
-        t_2.start();
-    }
-
-
-    private void InitEvent() {
-        editor = getSharedPreferences("ThresholdsService",MODE_PRIVATE).edit();
-        preferences_read = getSharedPreferences("Threshold",MODE_PRIVATE);
-        preferences_write = getSharedPreferences("ThresholdsService",MODE_PRIVATE);
-        db = SQLiteMaster.getInstance(this).getWritableDatabase();
+        Log.d(TAG, "onCreate: " + "服务器初始化");
+        editor = getSharedPreferences("Threshold", MODE_PRIVATE).edit();
+        preferences = getSharedPreferences("Threshold", MODE_PRIVATE);
+        /*MyNotification_Thresholds();*/
         manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        isTrue = true;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "阈值服务器连接");
+        if (startId == 1) {
+            Log.d(TAG, "阈值服务 启动实体 => " + startId);
+            arr_1[0] = preferences.getString("temperature", null);
+            arr_1[1] = preferences.getString("humidity", null);
+            arr_1[2] = preferences.getString("LightIntensity", null);
+            arr_1[3] = preferences.getString("co2", null);
+            arr_1[4] = preferences.getString("pm25", null);
+            arr_1[5] = preferences.getString("Status", null);
+            startT();
+        }
+        Log.d(TAG, "onStartCommand: " + "服务器连接");
         return super.onStartCommand(intent, flags, startId);
     }
 
-    @Override
-    public void onDestroy() {
-        Log.d(TAG, "阈值服务器关闭");
-        if (t_1.isAlive()) {
-            t_1.interrupt();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    private void startT() {
+        final String url_1 = "http://192.168.3.5:8088/transportservice/action/GetAllSense.do";
+        final Map<String, String> map_1 = new HashMap<>();
+        map_1.put("UserName", "user1");
+        final JSONObject json_1 = new JSONObject(map_1);
+
+        final String url_2 = "http://192.168.3.5:8088/transportservice/action/GetRoadStatus.do";
+        final Map<String, String> map_2 = new HashMap<>();
+        map_2.put("RoadId", "1");
+        map_2.put("UserName", "user1");
+        final JSONObject json_2 = new JSONObject(map_2);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isTrue) {
+                    long startTime = System.currentTimeMillis();
+                    try {
+                        OkHttpData.sendConnect(url_1, json_1.toString());
+                        Log.d(TAG, "环境检查: " + OkHttpData.JsonObjectRead());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        error();
+                    }
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                for (int i = 0; i < arr_1.length - 1; i++) {
+                                    if (!arr_1[i].equals("")) {
+                                        ifThreshold(i);
+                                        Log.d(TAG_arr, "arr_2["+i+"] 的值为" + arr_2[2]);
+                                    }
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                error();
+                            }
+                        }
+                    });
+                    try {
+                        long stopTime = System.currentTimeMillis();
+                        if (stopTime - startTime >= 0) {
+                            Thread.sleep(10000 - (stopTime - startTime));
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        }
-        if (t_2.isAlive()) {
-            t_2.interrupt();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isTrue) {
+                    long startTime = System.currentTimeMillis();
+                    try {
+                        OkHttpData.sendConnect(url_2, json_2.toString());
+                        Log.d(TAG, "道路状态：" + OkHttpData.JsonObjectRead());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        error();
+                    }
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                if (!arr_1[5].equals("")) {
+                                    ifThreshold(5);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                error();
+                            }
+                        }
+                    });
+                    try {
+                        long stopTime = System.currentTimeMillis();
+                        if (stopTime - startTime >= 0) {
+                            Thread.sleep(10000 - (stopTime - startTime));
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        }
-        super.onDestroy();
+        }).start();
     }
 
-    private String getDate() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = new Date();
-        String str = format.format(date);
-        return str;
+    private void ifThreshold(int count) {
+        try {
+            switch (count) {
+                case 0:
+                    Log.e(TAG, "温度阈值: " + arr_1[count] + "  当前温度: " + OkHttpData.JsonObjectRead().getString("temperature"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("temperature")))
+                        createNotification(this, 1, manager, "温度", arr_1[count] + "℃", OkHttpData.JsonObjectRead().getString("temperature") + " ℃");
+                    break;
+                case 1:
+                    Log.d(TAG, "温度阈值: " + arr_1[count] + " 当前湿度：" + OkHttpData.JsonObjectRead().getString("humidity"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("humidity")))
+                        createNotification(this, 2, manager, "湿度", arr_1[count] + " hPa", OkHttpData.JsonObjectRead().getString("humidity") + " hPa");
+                    break;
+                case 2:
+                    Log.e(TAG, "光照阈值: " + arr_1[count] + "  当前光照: " + OkHttpData.JsonObjectRead().getString("LightIntensity"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("LightIntensity")))
+                        createNotification(this, 3, manager, "光照", arr_1[count] + " Lux", OkHttpData.JsonObjectRead().getString("LightIntensity") + " Lux");
+                    break;
+                case 3:
+                    Log.e(TAG, "C02阈值: " + arr_1[count] + "  当前C02: " + OkHttpData.JsonObjectRead().getString("co2"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("co2")))
+                        createNotification(this, 4, manager, "CO₂", arr_1[count] + " mg/m3", OkHttpData.JsonObjectRead().getString("co2") + " mg/m3");
+                    break;
+                case 4:
+                    Log.e(TAG, "PM2.5阈值: " + arr_1[count] + "  当前PM2.5: " + OkHttpData.JsonObjectRead().getString("pm2.5"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("pm2.5")))
+                        createNotification(this, 5, manager, "PM2.5", arr_1[count] + " μg/m3", OkHttpData.JsonObjectRead().getString("pm2.5") + " μg/m3");
+                    break;
+                case 5:
+                    Log.e(TAG, "道路阈值: " + arr_1[count] + "  当前道路: " + OkHttpData.JsonObjectRead().getString("Status"));
+                    if (Integer.parseInt(arr_1[count]) < Integer.parseInt(OkHttpData.JsonObjectRead().getString("Status")))
+                        createNotification(this, 6, manager, "道路", arr_1[5], OkHttpData.JsonObjectRead().getString("Status"));
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /*任务栏通知*/
     private void createNotification(Context context, int id, NotificationManager manager, String name, String n1, String n2) {
         String CHANNEL_ID = "Threshold"; /*频道ID*/
-        /*判断API Android 版本 大于26 则执行*/
         Notification notification = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Log.e(TAG, "当前SDK_INT=> " + Build.VERSION.SDK_INT);
-            Log.e(TAG, "目标VERSION_CODES=> " + Build.VERSION_CODES.O);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            Log.d(TAG, "当前SDK_INT=> " + Build.VERSION.SDK_INT);
+            Log.d(TAG, "目标VERSION_CODES=> " + Build.VERSION_CODES.O);
             /* 渠道ID                通知状态等级*/
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "1", NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription("阈值通知组");   /* 设置渠道描述*/
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,"1",NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("阈值通知组");    /* 设置渠道描述*/
             channel.canBypassDnd();                 /* 是否绕过勿扰模式*/
             channel.setBypassDnd(true);             /* 设置绕过勿扰模式*/
             channel.canShowBadge();                 /* 桌面Launcher的消息角标*/
@@ -265,16 +215,45 @@ public class ThresholdsService_2 extends Service {
             channel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
             manager.createNotificationChannel(channel);
         }
-        Intent intent = new Intent(context, ThresholdsActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0); /*设置跳转 点击通知跳转页面*/
-        notification = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle(name + "报警")
-                .setContentText("阈值" + name + ": " + n1 + "  当前" + name + ": " + n2)
-                .setAutoCancel(true)              /*点击通知后 关闭通知*/
-                .setContentIntent(pendingIntent) /*设置跳转页面*/
-                .setSmallIcon(R.drawable.liaotian)   /*设置显示图标*/
+        Intent intent = new Intent(context, ThresholdsService_2.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,0);/*设置跳转 点击通知跳转页面*/
+        notification = new NotificationCompat.Builder(context,CHANNEL_ID)
+                .setContentTitle(name+"报警")
+                .setContentText("阈值"+name+"："+n1+" 当前"+name + "："+n2)
+                .setAutoCancel(true)                /*点击通知后 关闭通知*/
+                .setContentIntent(pendingIntent)    /*设置跳转页面*/
+                .setSmallIcon(R.drawable.liaotian)  /*设置显示图标*/
                 .setWhen(System.currentTimeMillis())
                 .build();
-        manager.notify(id, notification);
+                manager.notify(id,notification);    /*发布要在状态栏中显示的通知。如果您的应用程序已经发布了具有*相同ID的通知，
+                                                    但尚未取消，则该*将被更新的信息替换。*/
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy: " + "阈值服务关闭");
+        isTrue = false;
+        super.onDestroy();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        /*throw new UnsupportedOperationException("Not yet implemented");*/
+        return null;
+    }
+
+    /*protected void MyNotification_Thresholds() {
+        NotificationUtil notificationUtil = new NotificationUtil(this);
+        notificationUtil.sendNotification(getString(R.string.Thresholds_title), getString(R.string.Thresholds_content));
+        Log.d(TAG, "弹窗生成运行");
+    }*/
+
+    private void error() {
+        Intent stopIntent = new Intent(this, ThresholdsService_2.class);
+        stopService(stopIntent); /*关闭服务*/
+        editor.putBoolean("isThreshold", false);
+        editor.apply();
+        Toast.makeText(ThresholdsService_2.this, "网络错误 停止监听 请检查网络设置", Toast.LENGTH_SHORT).show();
     }
 }

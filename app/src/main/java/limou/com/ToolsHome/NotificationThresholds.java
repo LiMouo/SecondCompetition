@@ -13,7 +13,7 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
-import limou.com.ServiceCatalog.ThresholdsService;
+import limou.com.ServiceCatalog.ThresholdsService_2;
 import limou.com.secondcompetition.R;
 
 public class NotificationThresholds extends ContextWrapper {
@@ -44,7 +44,7 @@ public class NotificationThresholds extends ContextWrapper {
             channel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
             manager.createNotificationChannel(channel);
         }
-        Intent intent = new Intent(context, ThresholdsService.class);
+        Intent intent = new Intent(context, ThresholdsService_2.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,0);/*设置跳转 点击通知跳转页面*/
         notification = new NotificationCompat.Builder(context,CHANNEL_ID)
                 .setContentTitle(name+"报警")

@@ -12,10 +12,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity android:name="limou.com.RealTimeHome.RealTimeActivity"></activity>
+
         <service
-            android:name="limou.com.ServiceCatalog.ThresholdsService_2"
+            android:name="limou.com.ServiceCatalog.ThresholdsService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+        <service
+            android:name="limou.com.ServiceCatalog.ThresholdsService_3"
+            android:enabled="true"
+            android:exported="true" />
         <service
             android:name="limou.com.Test.ServiceTest.EnvironServiceTest"
             android:enabled="true"
@@ -34,7 +40,7 @@
             android:screenOrientation="landscape" />
 
         <service
-            android:name="limou.com.ServiceCatalog.ThresholdsService"
+            android:name="limou.com.ServiceCatalog.ThresholdsService_2"
             android:enabled="true"
             android:exported="true" />
         <service

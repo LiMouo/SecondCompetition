@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import limou.com.MyDecoration.MyDecoration;
-import limou.com.ServiceCatalog.ThresholdsService;
+import limou.com.ServiceCatalog.ThresholdsService_2;
 import limou.com.ThresholdsCatalog.ThresholdsAdapter_2;
 import limou.com.ToolsHome.SecondTitleTools;
 import limou.com.secondcompetition.R;
@@ -202,7 +202,7 @@ public class Test_Thresholds extends AppCompatActivity {
         //服务
     private void setService() {
         if (preferences.getBoolean("isThreshold",true)){
-            startIntent = new Intent(Test_Thresholds.this, ThresholdsService.class);
+            startIntent = new Intent(Test_Thresholds.this, ThresholdsService_2.class);
             startService(startIntent);
         }
     }

@@ -19,12 +19,14 @@ public class EnvironAdapter extends RecyclerView.Adapter<EnvironAdapter.EnvironV
     private Context mContext;
     private String[] arr = {"温度", "湿度", "光照", "CQ2","PM2.5","道路状态"};
     private int[] arr_1 ;
+    private int arr_2 ;
     private String TAG = "EnvironActivity";
     int o = 0;
 
     public EnvironAdapter(Context mContext,int[] arr_1) {
         this.mContext = mContext;
         this.arr_1 = arr_1;
+        arr_2 = 4;
     }
 
     @NonNull
@@ -38,14 +40,26 @@ public class EnvironAdapter extends RecyclerView.Adapter<EnvironAdapter.EnvironV
     public void onBindViewHolder(@NonNull EnvironViewHolder holder, final int position) {
         holder.tv_en.setText(arr[position]);
         holder.tv_en_circle.setText(arr_1[position]+"");
-        if(arr_1[5] >=4 && position == 5){
+        Log.d(TAG, "arr_1[1]"+arr_1[1]);
+        /*if(arr_1[5] >=4 && position == 5){
             holder.line_back.setBackgroundResource(R.drawable.environ_red);
         }
+
+        for (int i = 0;i<arr_2.length;i++){
+            if (arr_2[i] < arr_1[i]){
+                holder.line_back.setBackgroundResource(R.drawable.environ_red);
+            }
+        }*/
+
+        if (arr_1[5] > arr_2 && position == 5 ){
+            holder.line_back.setBackgroundResource(R.drawable.environ_red);
+        }
+
+
         holder.tv_en_circle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(mContext, "点击的是"+position, Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "onClick: "+v);
             }
         });
     }
