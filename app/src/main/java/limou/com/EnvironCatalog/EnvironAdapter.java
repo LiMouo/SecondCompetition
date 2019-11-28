@@ -2,6 +2,8 @@ package limou.com.EnvironCatalog;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import limou.com.RealTimeHome.RealTimeActivity;
 import limou.com.secondcompetition.R;
 
 public class EnvironAdapter extends RecyclerView.Adapter<EnvironAdapter.EnvironViewHolder> {
@@ -60,6 +63,17 @@ public class EnvironAdapter extends RecyclerView.Adapter<EnvironAdapter.EnvironV
             @Override
             public void onClick(View v) {
                 Toast.makeText(mContext, "点击的是"+position, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        holder.line_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, RealTimeActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("position",position);
+                intent.putExtras(bundle);
+                mContext.startActivity(intent);
             }
         });
     }

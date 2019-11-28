@@ -89,7 +89,7 @@ public class SecondTitleTools extends LinearLayout {
                         Intent intent;
                         switch (item.getItemId()){
                             case R.id.menu_main:
-                                intent = new Intent(mContext,MainActivity.class);
+                                intent = new Intent(mContext, MainActivity.class);
                                 Toast.makeText(mContext,"页面已跳转至 主页面", Toast.LENGTH_SHORT).show();
                                 mContext.startActivity(intent);
                                 break;

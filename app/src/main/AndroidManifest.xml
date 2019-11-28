@@ -30,8 +30,6 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name="limou.com.EnvironCatalog.EnvironTest.EnvironTestActivity" />
-
         <service
             android:name="limou.com.EnvironCatalog.EnvironService"
             android:enabled="true"

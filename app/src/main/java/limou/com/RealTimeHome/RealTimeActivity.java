@@ -65,12 +65,7 @@ public class RealTimeActivity extends AppCompatActivity implements ViewPager.OnP
     }
 
     private void InitData() {
-        db = SQLiteMaster.getInstance(this).getWritableDatabase();
-        for (int i = 0; i < Data.length; i++) {
-            Data[i] = new ArrayList<>();
-            tempData[i] = new ArrayList<>();
-        }
-        QueryData();//开启线程查询数据后面待用
+
     }
 
     private void QueryData() {
@@ -116,6 +111,14 @@ public class RealTimeActivity extends AppCompatActivity implements ViewPager.OnP
         SecondTitleTools.MenuCreate();
         SecondTitleTools.setTitle("实时显示");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        db = new SQLiteMaster(this).getWritableDatabase();
+        for (int i = 0; i < Data.length; i++) {
+            Data[i] = new ArrayList<>();
+            tempData[i] = new ArrayList<>();
+        }
+
+        QueryData();//开启线程查询数据后面待用
 
         //拿到上一页面点击的选项卡位置
         position = getIntent().getExtras().getInt("position");
