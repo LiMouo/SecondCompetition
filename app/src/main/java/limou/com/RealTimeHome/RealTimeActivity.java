@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -48,12 +49,12 @@ public class RealTimeActivity extends AppCompatActivity implements ViewPager.OnP
     private RadioButton[] radioButton = new RadioButton[6];
     private List<View> ViewPages = new ArrayList<>();
     private Handler handler = new Handler();
+    private String TAG = "RealTime 数据库数据";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         InitView();
-        InitData();
         BindData();
     }
 
@@ -64,9 +65,6 @@ public class RealTimeActivity extends AppCompatActivity implements ViewPager.OnP
         radioButton[position].setChecked(true);//根据上一页面的点击项选中对应的radio
     }
 
-    private void InitData() {
-
-    }
 
     private void QueryData() {
         QueryThread = new Thread(new Runnable() {
@@ -77,16 +75,17 @@ public class RealTimeActivity extends AppCompatActivity implements ViewPager.OnP
                         long startTime = System.currentTimeMillis();
                         for (int i = 0; i < tempData.length; i++) {
                             tempData[i].clear();
-                            temp_time.clear();
-                            Cursor cursor = db.query("Environ", null, null, null, null, null, null);
-                            if (cursor.moveToFirst()) {
-                                do {
-                                    for (int j = 1; j < 7; j++) {
-                                        tempData[j - 1].add(cursor.getInt(j));
-                                        temp_time.add(cursor.getString(7));
-                                    }
-                                } while (cursor.moveToNext());
-                            }
+                        }
+                        temp_time.clear();
+                        Cursor cursor = db.query("EnvironTestData", null, null, null, null, null, null);
+                        if (cursor.moveToFirst()) {
+                            Log.d(TAG, "run: "+cursor.getCount());
+                            do {
+                                for (int j = 1; j < 7; j++) {
+                                    tempData[j-1].add(cursor.getInt(j));
+                                    temp_time.add(cursor.getString(7));
+                                }
+                            } while (cursor.moveToNext());
                         }
                         times = temp_time;
                         for (int i = 0; i < Data.length; i++) {
@@ -116,6 +115,7 @@ public class RealTimeActivity extends AppCompatActivity implements ViewPager.OnP
         for (int i = 0; i < Data.length; i++) {
             Data[i] = new ArrayList<>();
             tempData[i] = new ArrayList<>();
+            tempData[i].clear();
         }
 
         QueryData();//开启线程查询数据后面待用
@@ -178,6 +178,99 @@ public class RealTimeActivity extends AppCompatActivity implements ViewPager.OnP
     }
 
     private void SetData(final int position) {
+
+        final LineChart lineChart = ViewPages.get(position).findViewById(R.id.LineChart);
+        TextView title = ViewPages.get(position).findViewById(R.id.T_title);
+        title.setText(names[position]);
+        title.setVisibility(View.VISIBLE);
+
+        lineChart.invalidate();//更新视图
+
+        BindThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<Entry> entries = new ArrayList<>();//存放坐标点
+                while (true){
+                    try {
+                        long startTime = System.currentTimeMillis();
+                        entries.clear();//清空上一次绘制的坐标点，
+                        for (int i = 0;i<Data[position].size();i++){
+                            entries.add(new Entry(i,Data[position].get(i)));
+                        }
+                        //原本有数据则只更新数据，不重新创建视图，减少渲染时间*//*
+                        if (lineChart.getLineData() != null && lineChart.getLineData().getDataSets().size() > 0){
+                            for (ILineDataSet set : lineChart.getLineData().getDataSets()){
+                                LineDataSet data = (LineDataSet) set;
+                                data.setValues(entries);
+                            }
+                        }else {
+                            LineDataSet lineDataSet = new LineDataSet(entries,null);
+                            lineDataSet.setColor(Color.parseColor("#8f8f8f"));
+                            lineDataSet.setCircleColor(Color.parseColor("#8f8f8f"));
+                            lineDataSet.setDrawCircles(true);
+                            lineDataSet.setDrawCircleHole(false);
+
+                            //LineData 封装与LineChart关联的所有数据的数据对象。
+                            LineData lineData = new LineData(lineDataSet);
+                            lineData.setDrawValues(false);
+                            lineChart.setLogEnabled(false);
+                            lineChart.setData(lineData);
+
+
+                            YAxis yAxisRight = lineChart.getAxisRight();
+                            YAxis yAxisLeft = lineChart.getAxisLeft();
+                            XAxis xAxis = lineChart.getXAxis();
+                            xAxis.setDrawAxisLine(false);//绘制轴线,最下面一根
+                            xAxis.setDrawGridLines(false);//设置每个点的线
+                            xAxis.setEnabled(true);//轴线启用
+                            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);//设置x轴的显示位置
+                            xAxis.setDrawLabels(true);//绘制label
+                            xAxis.setAvoidFirstLastClipping(false);
+                            xAxis.setLabelRotationAngle(90f);
+                            xAxis.setAxisLineWidth(2f);
+
+                            lineChart.getXAxis().setValueFormatter(new ValueFormatter() {
+                                @Override
+                                public String getFormattedValue(float value) {
+
+                                    if ((int)value < 0 || (int)value >= times.size()) return "";
+                                    else return times.get((int)value);
+                                }
+                            });
+
+                            yAxisLeft.setAxisMinimum(0);
+                            yAxisLeft.setDrawAxisLine(false);//绘制轴线,最下面一根
+                            yAxisLeft.setEnabled(true);//轴线启用
+                            yAxisRight.setEnabled(false);
+                            Description description = new Description();
+                            description.setEnabled(false);//描述启用
+                            lineChart.setDescription(description);
+                            lineChart.setTouchEnabled(false);
+                            lineChart.getLegend().setEnabled(false);
+                        }
+                        lineChart.getXAxis().setLabelCount(times.size());//设置X轴的label数量
+                        lineChart.getData().notifyDataChanged();//更新坐标轴数据,
+                        lineChart.notifyDataSetChanged();//更新图表数据
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                lineChart.invalidate();
+                            }
+                        });
+                        long endTime = System.currentTimeMillis();
+                        if(endTime - startTime <3000)
+                            Thread.sleep(3000-(endTime-startTime));
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                        break;
+                    }
+                }
+            }
+        });
+        BindThread.start();
+    }
+
+    /*private void SetData(final int position) {
         if (BindThread != null && BindThread.isAlive()) {//用于刷新上一个图标的线程如果还活着，就发送一个 InterruptedException
             BindThread.interrupt(); //中断这个线程
             try {
@@ -201,7 +294,7 @@ public class RealTimeActivity extends AppCompatActivity implements ViewPager.OnP
                         entries.clear(); //清空上一次绘制的坐标点
                         for (int i = 0; i < Data[position].size(); i++) {
                             entries.add(new Entry(i, Data[position].get(i)));
-                            /*原本有数据则只更新数据，不重新创建视图，减少渲染时间*/
+                            *//*原本有数据则只更新数据，不重新创建视图，减少渲染时间*//*
                             if (lineChart.getLineData() != null && lineChart.getLineData().getDataSets().size() > 0) { //!!!!!
                                 for (ILineDataSet set : lineChart.getLineData().getDataSets()) {
                                     LineDataSet data = (LineDataSet) set;
@@ -274,5 +367,19 @@ public class RealTimeActivity extends AppCompatActivity implements ViewPager.OnP
             }
         });
         BindThread.start();
+    }*/
+
+    @Override
+    protected void onDestroy() {
+        if(QueryThread.isAlive() || BindThread.isAlive()){
+            if(QueryThread.isAlive()) QueryThread.interrupt();
+            if (BindThread.isAlive()) BindThread.interrupt();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        super.onDestroy();
     }
 }

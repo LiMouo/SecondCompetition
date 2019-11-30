@@ -18,23 +18,18 @@ import java.util.Date;
 
 import limou.com.NetworkHome.OkHttpData;
 import limou.com.SQLiteCatalog.SQLiteMaster;
-import limou.com.ThresholdsCatalog.ThresholdsGson;
 
 public class EnvironService extends Service {
 
-    private SQLiteDatabase db;
-    private int[] arr_1 = new int[6];
+    private SQLiteDatabase db,db_2;
     private String url = "http://192.168.3.5:8088/transportservice/action/GetAllSense.do";
     private String url_2 = "http://192.168.3.5:8088/transportservice/action/GetRoadStatus.do";
-    private ThresholdsGson thresholdsGson;
-    private int mPm25, mCo2, mLightIntensity, mHumidity, mTemperature, mStatus;
     private EnvironGson environGson, environGson_2;
     private Handler handler = new Handler();
     private ContentValues values = new ContentValues();
+    private ContentValues values_2 = new ContentValues();
     private String TAG = "EnvironServiceTest";
-    private EnvironAdapter adapter;
     private Thread t_1;
-    private Boolean Run = true;
 
     public EnvironService() {
     }
@@ -50,6 +45,7 @@ public class EnvironService extends Service {
     public void onCreate() {
         Log.d(TAG, "Environ 服务器启动: ");
         db = SQLiteMaster.getInstance(this).getWritableDatabase();
+        db_2 = SQLiteMaster.getInstance(this).getWritableDatabase();
         getData();
         super.onCreate();
     }
@@ -77,17 +73,28 @@ public class EnvironService extends Service {
                         values.put("humidity", environGson.getHumidity());
                         values.put("temperature", environGson.getTemperature());
 
+                        values_2.put("pm25", environGson.get_$Pm2526());
+                        values_2.put("co2", environGson.getCo2());
+                        values_2.put("LightIntensity", environGson.getLightIntensity());
+                        values_2.put("humidity", environGson.getHumidity());
+                        values_2.put("temperature", environGson.getTemperature());
+
 
                         OkHttpData.sendConnect(url_2, json_2.toString());
                         environGson_2 = gson_2.fromJson(OkHttpData.JsonObjectRead().toString(), EnvironGson.class);
                         values.put("Status", environGson_2.getStatus());
                         values.put("datetime", getDate());
 
+                        values_2.put("Status", environGson_2.getStatus());
+                        values_2.put("datetime", new SimpleDateFormat("mm:ss").format(System.currentTimeMillis()));
+
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                long count = db.insert("environ", null, values);
+                                long count = db.insert("Environ", null, values);
+                                long count_2 = db_2.insert("EnvironTestData", null, values_2);
                                 Log.e(TAG, "写入数据库 第: " + count + " 条");
+                                Log.e(TAG, "写入数据库 第: " + count_2 + " 条");
                                 if (count > 20) {
                                     db.execSQL("delete from environ where id = (select id from environ limit 1)");
                                 }

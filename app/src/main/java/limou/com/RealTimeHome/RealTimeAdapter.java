@@ -41,7 +41,7 @@ public class RealTimeAdapter extends PagerAdapter {
     //因为它默认是看六张图片，第七张图片的时候就会报错，还有就是不要返回父类的作用
     @Override
     public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-       container.addView(views.get(position));
+       container.removeView(views.get(position));
     }
 
 

@@ -36,6 +36,15 @@ public class SQLiteMaster extends SQLiteOpenHelper {
             "pm25 integer," +           /*pm2.5*/
             "Status integer,"+          /*道路状态*/
             "datetime text)";           /*时间*/
+    private static final String DBEnvironTestData = "create table EnvironTestData(" +
+            "id integer primary key autoincrement," +
+            "temperature integer," +    /*温度*/
+            "humidity integer," +       /*湿度*/
+            "LightIntensity integer," + /*光照*/
+            "co2 integer," +            /*CQ2*/
+            "pm25 integer," +           /*pm2.5*/
+            "Status integer,"+          /*道路状态*/
+            "datetime text)";           /*时间*/
 
     private static final String DBThresholdsService = "create table ThresholdsService(" +
             "id integer primary key autoincrement," +
@@ -79,6 +88,7 @@ public class SQLiteMaster extends SQLiteOpenHelper {
         db.execSQL(DBEnviron);
         db.execSQL(DBBillM);
         db.execSQL(DBEnvironTest);
+        db.execSQL(DBEnvironTestData);
         db.execSQL(DBThresholdsService);
     }
 
@@ -87,12 +97,14 @@ public class SQLiteMaster extends SQLiteOpenHelper {
         db.execSQL("drop table if exists Users");
         db.execSQL("drop table if exists Environ");
         db.execSQL("drop table if exists EnvironTest");
+        db.execSQL("drop table if exists EnvironTestData");
         db.execSQL("drop table if exists Bill");
         db.execSQL("drop table if exists DBThresholdsService");
         db.execSQL(DBRegistry);
         db.execSQL(DBEnviron);
         db.execSQL(DBBillM);
         db.execSQL(DBEnvironTest);
+        db.execSQL(DBEnvironTestData);
         db.execSQL(DBThresholdsService);
     }
 }
