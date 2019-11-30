@@ -184,18 +184,48 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="#FFFFFF"
             android:gravity="center|top"
-            android:orientation="horizontal" >
+            android:orientation="vertical">
 
             <LinearLayout
+                android:layout_width="70dp"
+                android:layout_height="180dp"
+                android:background="@drawable/trip_xml"
                 android:gravity="center|top"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                >
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/light_red"
+                    android:layout_width="45dp"
+                    android:layout_height="0dp"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/trip_red_backcolor" />
+
+                <TextView
+                    android:id="@+id/light_yellow"
+                    android:layout_width="45dp"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/trip_yellow_backcolor" />
+
+                <TextView
+                    android:id="@+id/light_greed"
+                    android:layout_width="45dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/trip_green_backcolor" />
 
             </LinearLayout>
 
-            </LinearLayout>
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:background="#000" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
