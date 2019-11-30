@@ -12,7 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name="limou.com.TripHome.TripActivity"></activity>
+        <activity android:name="limou.com.TripHome.TripActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            ></activity>
         <activity
             android:name="limou.com.RealTimeHome.RealTimeActivity"
             android:launchMode="singleTask"

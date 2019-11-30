@@ -28,6 +28,7 @@ import limou.com.EnvironCatalog.EnvironActivity_2;
 import limou.com.MainActivity;
 import limou.com.RealTimeHome.RealTimeActivity;
 import limou.com.ThresholdsCatalog.ThresholdsActivity;
+import limou.com.TripHome.TripActivity;
 import limou.com.secondcompetition.R;
 
 
@@ -105,6 +106,9 @@ public class SecondTitleTools extends LinearLayout {
                                 break;
                             case R.id.menu_RealTime:
                                 intent = new Intent(mContext, RealTimeActivity.class);
+                                mContext.startActivity(intent);
+                            case R.id.menu_Trip:
+                                intent = new Intent(mContext, TripActivity .class);
                                 mContext.startActivity(intent);
                             default:
                                 break;

@@ -17,4 +17,8 @@
         android:id="@+id/menu_RealTime"
         android:title="RealTime"/>
 
+    <item
+        android:id="@+id/menu_Trip"
+        android:title="TripActivity"/>
+
 </menu>
