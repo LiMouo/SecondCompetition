@@ -26,7 +26,6 @@ import java.util.List;
 
 import limou.com.EnvironCatalog.EnvironActivity_2;
 import limou.com.MainActivity;
-import limou.com.RealTimeHome.RealTimeActivity;
 import limou.com.ThresholdsCatalog.ThresholdsActivity;
 import limou.com.TripHome.TripActivity;
 import limou.com.secondcompetition.R;
@@ -104,12 +103,10 @@ public class SecondTitleTools extends LinearLayout {
                                 Toast.makeText(mContext,"页面已跳转至 阈值设置 页面", Toast.LENGTH_SHORT).show();
                                 mContext.startActivity(intent);
                                 break;
-                            case R.id.menu_RealTime:
-                                intent = new Intent(mContext, RealTimeActivity.class);
-                                mContext.startActivity(intent);
                             case R.id.menu_Trip:
                                 intent = new Intent(mContext, TripActivity .class);
                                 mContext.startActivity(intent);
+                                break;
                             default:
                                 break;
                         }

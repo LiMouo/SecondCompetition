@@ -81,6 +81,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:layout_marginTop="5dp"
+        android:layout_margin="20dp"
         android:background="#FFFFFF"
         >
         <LinearLayout
@@ -88,7 +89,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:paddingLeft="20dp"
+            android:paddingLeft="80dp"
             >
                 <TextView
                     android:layout_width="match_parent"
@@ -186,11 +187,12 @@
             android:layout_weight="1"
             android:background="#FFFFFF"
             android:gravity="center|top"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="70dp"
-                android:layout_height="180dp"
+                android:layout_marginTop="5dp"
+                android:layout_height="205dp"
                 android:background="@drawable/trip_xml"
                 android:gravity="center|top"
                 android:orientation="vertical">
@@ -220,10 +222,45 @@
 
             </LinearLayout>
 
-            <TextView
-                android:layout_width="20dp"
-                android:layout_height="match_parent"
-                android:background="#000" />
+            <LinearLayout
+                android:layout_width="70dp"
+                android:layout_height="205dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/trip_xml"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ToggleButton
+                    android:id="@+id/text_red"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:background="@drawable/tirp_togglebutton_red"
+                    android:checked="true"
+                    android:textOff="@null"
+                    android:textOn="@null" />
+
+                <ToggleButton
+                    android:id="@+id/text_yellow"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/tirp_togglebutton_yellow"
+                    android:textOff="@null"
+                    android:textOn="@null" />
+
+                <ToggleButton
+                    android:id="@+id/text_green"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/tirp_togglebutton_green"
+                    android:textOff="@null"
+                    android:textOn="@null" />
+
+            </LinearLayout>
+
+
 
         </LinearLayout>
 

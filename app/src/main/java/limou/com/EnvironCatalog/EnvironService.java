@@ -97,6 +97,8 @@ public class EnvironService extends Service {
                                 Log.e(TAG, "写入数据库 第: " + count_2 + " 条");
                                 if (count > 20) {
                                     db.execSQL("delete from environ where id = (select id from environ limit 1)");
+                                }if (count_2 > 20) {
+                                    db_2.execSQL("delete from environ where id = (select id from environ limit 1)");
                                 }
                             }
                         });
